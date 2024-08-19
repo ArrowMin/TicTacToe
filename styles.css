@@ -1,0 +1,28 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+}
+
+.gameContainer {
+  display: grid;
+  aspect-ratio: 1/1;
+  grid-template-columns: repeat(3, minmax(100px, 250px));
+  grid-template-rows: repeat(3, minmax(100px, 250px));
+}
+
+.cell {
+  border: 1px solid red;
+}
