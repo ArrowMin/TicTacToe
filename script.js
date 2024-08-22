@@ -138,6 +138,8 @@ function gameController() {
 
   const tictactoe = GameBoard();
 
+  const getBoard = () => tictactoe.getBoard();
+
   const switchTurn = () => {
     activePlayer = activePlayer === playerOne ? playerTwo : playerOne;
   };
@@ -191,28 +193,13 @@ function gameController() {
   };
 
   return {
-    switchTurn,
+    getBoard,
     getActivePlayer,
-    printNewRound,
     playRound,
-    startNewRound,
   };
 }
 
 /*
-const tictactoe = GameBoard();
-
-tictactoe.printBoard();
-
-tictactoe.placeToken(2, 2, 2);
-
-tictactoe.printBoard();
-
-tictactoe.placeToken(1, 2, 2);
-
-tictactoe.printBoard();
-*/
-
 const game = gameController();
 
 game.printNewRound();
@@ -229,9 +216,47 @@ game.playRound(1, 0);
 game.playRound(0, 1);
 game.playRound(1, 1);
 game.playRound(0, 2);
-
-/* Add cell functionality if needed
-function Cell() {
-
-}
 */
+
+function updateUI(cell, token) {
+  if (cell.textContent === "") {
+    cell.textContent = token === 1 ? "O" : "X";
+  }
+}
+
+function screenController() {
+  const cells = document.querySelectorAll(".cell");
+  const game = gameController();
+
+  cells.forEach((cell) => {
+    cell.addEventListener("click", () => {
+      const row = parseInt(cell.getAttribute("data-row"));
+      const col = parseInt(cell.getAttribute("data-col"));
+
+      game.playRound(row, col);
+      updateScreen();
+    });
+  });
+
+  const updateScreen = () => {
+    const board = game.getBoard();
+
+    board.forEach((rowArray, rowIndex) => {
+      rowArray.forEach((cellValue, colIndex) => {
+        const cell = document.querySelector(
+          `.cell[data-row="${rowIndex}"][data-col="${colIndex}"]`
+        );
+
+        if (cellValue === 1) {
+          cell.textContent = "X";
+        } else if (cellValue === 2) {
+          cell.textContent = "O";
+        } else {
+          cell.textContent = "";
+        }
+      });
+    });
+  };
+}
+
+screenController();
