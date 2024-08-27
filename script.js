@@ -89,6 +89,21 @@ function GameBoard() {
       return board[0][2];
     }
 
+    //Check for a tie
+    let allFilled = true;
+    for (let i = 0; i < rows; i++) {
+      for (let j = 0; j < columns; j++) {
+        if (board[i][j] === 0) {
+          allFilled = false;
+          break;
+        }
+      }
+    }
+
+    if (allFilled) {
+      return "tie";
+    }
+
     //No winner
     return null;
   };
@@ -130,8 +145,8 @@ function gameController() {
   let playerOne = Player("Player One", 1);
   let playerTwo = Player("Player Two", 2);
 
-  playerOne.changePlayerName("Angelo");
-  playerTwo.changePlayerName("Coco");
+  //playerOne.changePlayerName("Angelo");
+  //playerTwo.changePlayerName("Coco");
 
   let activePlayer = playerOne;
   let toGoFirstNextRound = playerTwo;
@@ -139,6 +154,10 @@ function gameController() {
   const tictactoe = GameBoard();
 
   const getBoard = () => tictactoe.getBoard();
+
+  const getPlayerOne = () => playerOne;
+
+  const getPlayerTwo = () => playerTwo;
 
   const switchTurn = () => {
     activePlayer = activePlayer === playerOne ? playerTwo : playerOne;
@@ -150,16 +169,18 @@ function gameController() {
     console.log(`${getActivePlayer().getName()}'s turn.`);
   };
 
-  const startNewRound = () => {
+  //Take in function to be called
+  const startNewRound = (turnMessage) => {
     activePlayer = toGoFirstNextRound;
-
     toGoFirstNextRound = activePlayer === playerOne ? playerTwo : playerOne;
-
     tictactoe.resetBoard();
     printNewRound();
+    //Show the new starting player
+    turnMessage(`${getActivePlayer().getName()}'s turn.`);
   };
 
-  const playRound = (row, column) => {
+  //Take in a row, column, and function to be called.
+  const playRound = (row, column, turnMessage, winnerMessage) => {
     console.log(
       `Placing ${getActivePlayer().getName()}'s token into position ${row}, ${column}`
     );
@@ -172,22 +193,34 @@ function gameController() {
       //Check for a winner
       let winnerToken = tictactoe.checkForWinner();
 
-      //Winner occured
-      if (winnerToken !== null) {
+      //If tie
+      if (winnerToken === "tie") {
+        console.log("The game is a tie!");
+        winnerMessage("The game is a tie!");
+        startNewRound(turnMessage);
+        //If winner is found
+      } else if (winnerToken !== null) {
         let winningPlayer =
           winnerToken === playerOne.getToken() ? playerOne : playerTwo;
 
         //Congratulate winner
         console.log(
-          `Congratulations!, ${winningPlayer.getName()} wins the match!`
+          `Congratulations! ${winningPlayer.getName()} wins the match!`
         );
-        startNewRound();
+        winnerMessage(
+          `Congratulations! ${winningPlayer.getName()} wins the match!`
+        );
+        startNewRound(turnMessage);
+        //If game is still going
       } else {
         switchTurn();
+        //Display the current turn
+        turnMessage(`${getActivePlayer().getName()}'s turn.`);
         printNewRound();
       }
     } else {
       console.log("Cannot place token here, repeat turn.");
+      //displayMessage(`${getActivePlayer().getName()}'s turn.`);
       printNewRound();
     }
   };
@@ -196,6 +229,9 @@ function gameController() {
     getBoard,
     getActivePlayer,
     playRound,
+    startNewRound,
+    getPlayerOne,
+    getPlayerTwo,
   };
 }
 
@@ -227,15 +263,65 @@ function updateUI(cell, token) {
 function screenController() {
   const cells = document.querySelectorAll(".cell");
   const game = gameController();
+  const turnDiv = document.getElementById("turnStatus");
+  const winnerDiv = document.getElementById("gameStatus");
+  const changeNamesButton = document.getElementById("changeNamesButton");
+  const closeDialogButton = document.getElementById("closeDialogButton");
+  const saveNamesButton = document.getElementById("saveNamesButton");
+  const resetButton = document.getElementById("resetButton");
+  const dialog = document.getElementById("nameChangeDialog");
+
+  const turnMessage = (message) => {
+    turnDiv.textContent = message;
+  };
+
+  const winnerMessage = (message) => {
+    winnerDiv.textContent = message;
+  };
+
+  //Display initial player turn
+  turnMessage(`${game.getActivePlayer().getName()}'s turn.`);
 
   cells.forEach((cell) => {
     cell.addEventListener("click", () => {
       const row = parseInt(cell.getAttribute("data-row"));
       const col = parseInt(cell.getAttribute("data-col"));
 
-      game.playRound(row, col);
+      game.playRound(row, col, turnMessage, winnerMessage);
       updateScreen();
     });
+  });
+
+  resetButton.addEventListener("click", () => {
+    game.startNewRound(turnMessage);
+    updateScreen();
+  });
+
+  changeNamesButton.addEventListener("click", () => {
+    const playerOneNameInput = document.getElementById("playerOneName");
+    const playerTwoNameInput = document.getElementById("playerTwoName");
+
+    playerOneNameInput.value = game.getPlayerOne().getName();
+    playerTwoNameInput.value = game.getPlayerTwo().getName();
+    dialog.showModal();
+  });
+
+  closeDialogButton.addEventListener("click", () => {
+    dialog.close();
+  });
+
+  saveNamesButton.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    const playerOneName = document.getElementById("playerOneName").value;
+    const playerTwoName = document.getElementById("playerTwoName").value;
+
+    game.getPlayerOne().changePlayerName(playerOneName);
+    game.getPlayerTwo().changePlayerName(playerTwoName);
+
+    turnMessage(`${game.getActivePlayer().getName()}'s turn.`);
+
+    dialog.close();
   });
 
   const updateScreen = () => {

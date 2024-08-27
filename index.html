@@ -11,10 +11,11 @@
     <div class="header">
       <h1>Slappy Tic Tac Toe!</h1>
       <div class="headerButtonContainer">
-        <button>Change Player Names</button>
-        <button>Reset Board</button>
+        <button id="changeNamesButton">Change Player Names</button>
+        <button id="resetButton">Reset Board</button>
       </div>
-      <div class="playerScoreContainer">div</div>
+      <div id="turnStatus">div</div>
+      <div id="gameStatus"></div>
     </div>
     <div class="content">
       <div class="gameContainer">
@@ -29,5 +30,27 @@
         <div class="cell" data-row="2" data-col="2"></div>
       </div>
     </div>
+
+    <dialog id="nameChangeDialog">
+      <form method="dialog">
+        <h2>Change Player Names</h2>
+        <label for="playerOneName">Player One Name:</label>
+        <input
+          type="text"
+          id="playerOneName"
+          name="playerOneName"
+          value="Player One"
+        /><br />
+        <label for="playerTwoName">Player Two Name:</label>
+        <input
+          type="text"
+          id="playerTwoName"
+          name="playerTwoName"
+          value="Player Two"
+        /><br />
+        <button id="saveNamesButton">Save</button>
+        <button id="closeDialogButton">Close</button>
+      </form>
+    </dialog>
   </body>
 </html>
